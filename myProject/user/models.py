@@ -7,7 +7,7 @@ from .managers import CustomUserManager
 
 class CustomUser(AbstractUser):
     username = None 
-    email = models.EmailField(_("email address"), unique=True, db_index=True)
+    email = models.EmailField(_("email"), unique=True, db_index=True)
     is_provider = models.BooleanField(default=False)
     is_seeker = models.BooleanField(default=False)
 
