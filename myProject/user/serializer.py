@@ -1,6 +1,9 @@
 from rest_framework import serializers
 from .models import Provider, Seeker, CustomUser
 from django.contrib.auth.models import Group
+from django.db import transaction,IntegrityError
+
+
 
 
 class ProviderSerializer(serializers.ModelSerializer):
@@ -32,19 +35,29 @@ class ProviderSerializer(serializers.ModelSerializer):
             'password': validated_data['password'],
             'is_provider':True
         }
-        user = CustomUser.objects.create_user(**user_data)
-        
-        provider = Provider.objects.create(
-            user=user,
-            work_email=validated_data['work_email']
-        )
-        group = Group.objects.get(name='Provider')
 
-            # Add the user to the group
-        group.user_set.add(user)
+        with transaction.atomic():
+            try:
+    
+                user = CustomUser.objects.create_user(**user_data)
+                
+                provider = Provider.objects.create(
+                    user=user,
+                    work_email=validated_data['work_email']
+                )
+                serializer = ProviderSerializer(provider) # when you try to serialize the object for the response, it is still in an unsaved state and therefore cannot be converted to JSON correctly.
+                data = serializer.data
+                group = Group.objects.get(name='Provider')
 
-        return provider
+                    # Add the user to the group
+                group.user_set.add(user)
+
+                return data
+            except IntegrityError as e:
+                return ({"Error Message": str(e)})
         
+        
+            
 
 
 
@@ -79,18 +92,25 @@ class SeekerSerializer(serializers.ModelSerializer):
             'password': validated_data['password'],
             'is_seeker':True
         }
-        user = CustomUser.objects.create_user(**user_data)
-        
-        seeker = Seeker.objects.create(
-            user=user,
-            ed_level=validated_data['ed_level']
-        )
-        group = Group.objects.get(name='Seeker')
+        with transaction.atomic():
+            try:
+    
+                user = CustomUser.objects.create_user(**user_data)
+                
+                seeker = Seeker.objects.create(
+                    user=user,
+                    ed_level=validated_data['ed_level']
+                )
+                serializer = SeekerSerializer(seeker) # when you try to serialize the object for the response, it is still in an unsaved state and therefore cannot be converted to JSON correctly.
+                data = serializer.data
+                group = Group.objects.get(name='Seeker')
 
-        # Add the user to the group
-        group.user_set.add(user)
+                    # Add the user to the group
+                group.user_set.add(user)
 
-        return seeker
+                return data
+            except IntegrityError as e:
+                return ({"Error Message": str(e)})
         
         
         
@@ -100,3 +120,11 @@ class UserSerializer(serializers.ModelSerializer):
         model = CustomUser
         fields = ["email", "first_name", "last_name"]
         
+        
+class LoginSerializer(serializers.ModelSerializer):
+    email = serializers.EmailField()
+    password = serializers.CharField()
+    class Meta:
+        model = CustomUser
+        
+        fields = ['email','password']

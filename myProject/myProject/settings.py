@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,7 +27,7 @@ SECRET_KEY = 'django-insecure-4&g!8x)-b2#!rub06es)nt)@^tzf^loqmoq)l4=h4i4%+w9!vh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['5128-91-186-225-75.ngrok-free.app','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['1cf9-176-29-15-236.ngrok-free.app','localhost','127.0.0.1']
 
 
 # Application definition
@@ -135,6 +137,16 @@ AUTH_USER_MODEL = "user.CustomUser"
 
 
 # settings.py
-CSRF_TRUSTED_ORIGINS = ['https://5128-91-186-225-75.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://1cf9-176-29-15-236.ngrok-free.app']
 
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ],
+}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Set the token expiration (example: 1 hour)
+    # Other JWT settings...
+}
