@@ -156,7 +156,7 @@ def login_provider(request):
 
 @api_view(["POST"])
 @permission_classes([AllowAny])
-def login_provider(request):
+def login_seeker(request):
     print(request.data)
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
