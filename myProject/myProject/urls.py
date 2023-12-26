@@ -17,10 +17,15 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path,include
 from rest_framework_simplejwt.views import TokenRefreshView
+from django.conf import settings
+from django.conf.urls.static import static 
+
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('user/',include('user.urls')),
     path('token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('scholar/', include('scholar_ships.urls')),
+    
 
-]
+]+static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT) # When we create an image this will allows you to automatically create a url to refrence it and this url will be saved in the database 

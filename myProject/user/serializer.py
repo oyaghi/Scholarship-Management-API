@@ -121,6 +121,11 @@ class UserSerializer(serializers.ModelSerializer):
         fields = ["email", "first_name", "last_name"]
         
         
+class User2Serializer(serializers.ModelSerializer):
+    
+    class Meta:
+        fields = ['email', 'first_name', 'last_name', 'work_email']
+        
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
     password = serializers.CharField()
@@ -128,3 +133,6 @@ class LoginSerializer(serializers.ModelSerializer):
         model = CustomUser
         
         fields = ['email','password']
+        
+        
+        

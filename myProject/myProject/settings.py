@@ -12,7 +12,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 
 from pathlib import Path
 from datetime import timedelta
-
+import os 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-4&g!8x)-b2#!rub06es)nt)@^tzf^loqmoq)l4=h4i4%+w9!vh
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['1cf9-176-29-15-236.ngrok-free.app','localhost','127.0.0.1']
+ALLOWED_HOSTS = ['21e9-92-241-35-3.ngrok-free.app','localhost','127.0.0.1']
 
 
 # Application definition
@@ -42,7 +42,9 @@ INSTALLED_APPS = [
     'user',
     'rest_framework',
     'djoser',
-    'rest_framework_simplejwt'
+    'rest_framework_simplejwt',
+    'scholar_ships',
+    'corsheaders',
     
 ]
 
@@ -54,6 +56,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
 ]
 
 ROOT_URLCONF = 'myProject.urls'
@@ -127,6 +131,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = '/media/' # For saving images
+MEDIA_ROOT =  os.path.join(BASE_DIR, 'media')
+
+# STATICFILES_DIRS= (
+#     os.path.join(BASE_DIR, 'static'),
+# )
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -137,7 +147,7 @@ AUTH_USER_MODEL = "user.CustomUser"
 
 
 # settings.py
-CSRF_TRUSTED_ORIGINS = ['https://1cf9-176-29-15-236.ngrok-free.app']
+CSRF_TRUSTED_ORIGINS = ['https://21e9-92-241-35-3.ngrok-free.app']
 
 
 REST_FRAMEWORK = {
@@ -150,3 +160,25 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Set the token expiration (example: 1 hour)
     # Other JWT settings...
 }
+
+
+CORS_ALLOWED_ORIGINS = [
+    "https://ab6f-5-45-129-28.ngrok-free.app",
+    'https://scolarship-website.web.app',
+    'http://localhost:3001',
+    
+    # Add your front-end domain here
+    # Other allowed origins if needed
+]
+
+# Email Verification 
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_POST = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = "Batatasuper3214@gmail.com"
+EMAIL_HOST_PASSWORD = "qnfyuratjfqtuabl"
+EMAIL_FROM = "Batatasuper3214@gmail.com"
+
+PASSWORD_REST_TIMEOUT = 14400  # 4 hours after that the token will be expired and you will have to register again inorder to get another email verficiation 

@@ -1,0 +1,7 @@
+djangorestframework-simplejwt
+Pillow 
+djoser
+djangorestframework
+psycopg2-binary
+django
+six
