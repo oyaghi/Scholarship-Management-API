@@ -5,5 +5,5 @@ urlpatterns = [
     path('login/provider/', views.login_provider),
     path('login/seeker/', views.login_seeker),
     path('get/provdier/', views.view_provider),
-    # path('activate/(?P<uidb64>[0-9A-Za-z_\-]+)/(?P<token>[0-9A-Za-z]{1,13}-[0-9A-Za-z]{1,20})/', views.activate)
+    path('activate/<str:uidb64>/<str:token>/', views.activate, name='activate')
 ]

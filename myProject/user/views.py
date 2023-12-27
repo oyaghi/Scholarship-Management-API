@@ -16,19 +16,33 @@ from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 from scholar_ships.permissions import isProvider, isSeeker
 
 # #Email
-# from django.contrib.sites.shortcuts import get_current_site  
-# from django.utils.encoding import force_bytes
-# from django.utils.encoding import force_str
-# from django.utils.http import urlsafe_base64_encode, urlsafe_base64_decode  
-# from django.template.loader import render_to_string  
-# from .tokens import account_activation_token  
-# from django.contrib.auth.models import User  
-# from django.core.mail import EmailMessage  
-# from django.contrib.auth import get_user_model
-# from django.http import HttpResponse
+from django.core.mail import send_mail
+from django.conf import settings
+from .tokens import EmailVerificationTokenGenerator
+from django.utils.http import urlsafe_base64_encode  # For encoding the user ID
+from django.utils.encoding import force_bytes  # For ensuring consistent byte representation
+from django.contrib.sites.shortcuts import get_current_site
+from django.contrib.auth import get_user_model
+from django.http import HttpResponse
+from django.utils.encoding import force_str
+from django.utils.http import urlsafe_base64_decode
 
 
 
+def activate(request, uidb64, token):  
+    
+    User = get_user_model()  
+    try:  
+        uid = force_str(urlsafe_base64_decode(uidb64))  
+        user = CustomUser.objects.get(pk=uid)  
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):  
+        user = None  
+    if user is not None and EmailVerificationTokenGenerator().check_token(user, token):  
+        user.is_active = True  
+        user.save()  
+        return HttpResponse('Thank you for your email confirmation. Now you can login your account.')  
+    else:  
+        return HttpResponse('Activation link is invalid!') 
 
 
 
@@ -48,11 +62,30 @@ def register(request):
         
             if seri.is_valid():
                 
-                e=seri.save()
-                if 'Error Message'in e: 
-                    return Response({"Message":e }, status=status.HTTP_200_OK)
+                user=seri.save()
+                if 'Error Message'in user: 
+                    return Response({"Message":user }, status=status.HTTP_200_OK)
                 
-                return Response({"Message": "Provider Created Successfully"}, status= status.HTTP_201_CREATED)
+                else:
+                    try:
+                        # Creating Verification Email
+                        user             = CustomUser.objects.get(email=user['email'])
+                        token_generator  = EmailVerificationTokenGenerator()
+                        token            = token_generator.make_token(user)
+                        uidb64           = urlsafe_base64_encode(force_bytes(user.pk))
+                        current_site     = get_current_site(request)
+                        verification_url = f"https://{current_site.domain}/user/activate/{uidb64}/{token}/"
+                        
+                        # Sending the email 
+                        subject         = 'Email verification'
+                        message         = f'Hi {user.first_name}\nPlease Verify Your Email\n{verification_url}'
+                        email_from      = settings.EMAIL_HOST_USER
+                        recipient_list  = [user.email,]
+                        send_mail(subject, message,email_from,recipient_list)
+                        return Response({"Message": f"Provider Created Successfully, Please check your email"}, status= status.HTTP_201_CREATED)
+                    except Exception as e:
+                        return Response({"Message": str(e)})
+
             else:
                 return Response({"Message": "Error in validating data"}, status= status.HTTP_400_BAD_REQUEST)
         
@@ -132,7 +165,7 @@ def login_provider(request):
         
         user = authenticate(request, email=email, password=password)
         
-        if user is not None and user.is_provider:
+        if user is not None and user.is_provider and user.is_active:
             provider = CustomUser.objects.get(email=email, is_provider=True)
             provider_id = provider.id            
             try:
@@ -217,5 +250,5 @@ def view_provider(request):
 
 
 
-    
-    
+
+

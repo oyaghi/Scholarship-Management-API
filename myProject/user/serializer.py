@@ -51,9 +51,10 @@ class ProviderSerializer(serializers.ModelSerializer):
 
                     # Add the user to the group
                 group.user_set.add(user)
-
-                return data
+                
+                return user_data
             except IntegrityError as e:
+                
                 return ({"Error Message": str(e)})
         
         

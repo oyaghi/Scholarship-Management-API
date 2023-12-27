@@ -1,11 +1,15 @@
 from django.contrib.auth.tokens import PasswordResetTokenGenerator
-import six 
+from django.utils.encoding import force_str
+from .models import CustomUser
 
 
-class AccountActicationTokenGenerator(PasswordResetTokenGenerator):
-    def _make_hash_value(self,user,timestamp):
+class EmailVerificationTokenGenerator(PasswordResetTokenGenerator):
+    def _make_hash_value(self, data, timestamp):
+        user = CustomUser.objects.get(email=data.email)
         return (
-            six.text_type(user.pk) + six.text_type(timestamp) + six.text_type(user.is_active)
+            force_str(user.pk) +
+            force_str(timestamp) +
+            force_str(user.is_active) +
+            force_str(user.email)  # Add user email for uniqueness
         )
-        
-account_activation_token = AccountActicationTokenGenerator()
+
