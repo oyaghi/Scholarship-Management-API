@@ -6,6 +6,12 @@ Project Description
 
 ### Todo
 
+- [ ] Should we allow editing the user email and other things ? ? ?  
+- [ ] Password Reset  
+- [ ] You are not a robot  
+- [ ] Don't forget to update the login for both provider and seeker to include the is_active attribute  
+- [ ] Don't forget to update the the registration to include the seeker in the Email verification  
+- [ ] DRY for the Email verification thing  
 - [ ] Implements Throttle for Provider, Seeker, Anonomos Users (OPTIONAL)  
 - [ ] Implement Pagination on Functions the has the GET method (OPTIONAL)  
 - [ ] LOGOUT (Tell the Front-end to implement a button that clear the stored token, and then redirect the user to the login page)  
@@ -14,10 +20,14 @@ Project Description
 
 ### In Progress
 
-- [ ] Implement Email Verfication  
+- [ ] Since we check if the user email is exists Firas can't create a provider account since he is a seeker  
 
 ### Done ✓
 
+- [x] Test all the function that uses the Email verification  
+- [x] Fix all the functions that uses the email verification  
+- [x] Find a way for re-send Email verification Email/ link  
+- [x] Implement Email Verfication  
 - [x] Edit the "add_view" function, the problem is with the GET since it needs a Provider Token in order to function, Eliminate the Token Needs, since the api call should be something casual  
 - [x] Add "FavList" which will view all the views that the Seeker Added to Favorite  
 - [x] implement "Favorit Scholarship" for Seeker (OPTIONAL)  

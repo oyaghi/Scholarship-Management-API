@@ -29,6 +29,60 @@ from django.utils.http import urlsafe_base64_decode
 
 
 
+
+# Start of Email thing 
+
+@api_view(['POST'])
+@csrf_exempt
+@permission_classes([AllowAny])
+def re_send_email_verification(request):
+    user = request.data
+    try:
+        # Creating Verification Email
+        user             = CustomUser.objects.get(email=user['email'])
+        token_generator  = EmailVerificationTokenGenerator()
+        token            = token_generator.make_token(user)
+        uidb64           = urlsafe_base64_encode(force_bytes(user.pk))
+        current_site     = get_current_site(request)
+        verification_url = f"https://{current_site.domain}/user/activate/{uidb64}/{token}/"
+        
+        # Sending the email 
+        subject         = 'Email verification'
+        message         = f'Hi {user.first_name}\nPlease Verify Your Email\n{verification_url}'
+        email_from      = settings.EMAIL_HOST_USER
+        recipient_list  = [user.email,]
+        send_mail(subject, message,email_from,recipient_list)
+        return Response({"Message": f"The Verification Email has been sent again Please check your email"}, status= status.HTTP_201_CREATED)
+    except Exception as e:
+        return Response({"Message": str(e)})
+
+
+
+def EmailVerification(request,user):
+    try:
+        # Creating Verification Email
+        user             = CustomUser.objects.get(email=user['email'])
+        token_generator  = EmailVerificationTokenGenerator()
+        token            = token_generator.make_token(user)
+        uidb64           = urlsafe_base64_encode(force_bytes(user.pk))
+        current_site     = get_current_site(request)
+        verification_url = f"https://{current_site.domain}/user/activate/{uidb64}/{token}/"
+        
+        # Sending the email 
+        subject         = 'Email verification'
+        message         = f'Hi {user.first_name}\nPlease Verify Your Email\n{verification_url}'
+        email_from      = settings.EMAIL_HOST_USER
+        recipient_list  = [user.email,]
+        send_mail(subject, message,email_from,recipient_list)
+        return "Email has been sent successfully"
+    except Exception as e:
+        return str(e)
+
+
+# End of Email thing 
+
+
+
 def activate(request, uidb64, token):  
     
     User = get_user_model()  
@@ -67,24 +121,8 @@ def register(request):
                     return Response({"Message":user }, status=status.HTTP_200_OK)
                 
                 else:
-                    try:
-                        # Creating Verification Email
-                        user             = CustomUser.objects.get(email=user['email'])
-                        token_generator  = EmailVerificationTokenGenerator()
-                        token            = token_generator.make_token(user)
-                        uidb64           = urlsafe_base64_encode(force_bytes(user.pk))
-                        current_site     = get_current_site(request)
-                        verification_url = f"https://{current_site.domain}/user/activate/{uidb64}/{token}/"
-                        
-                        # Sending the email 
-                        subject         = 'Email verification'
-                        message         = f'Hi {user.first_name}\nPlease Verify Your Email\n{verification_url}'
-                        email_from      = settings.EMAIL_HOST_USER
-                        recipient_list  = [user.email,]
-                        send_mail(subject, message,email_from,recipient_list)
-                        return Response({"Message": f"Provider Created Successfully, Please check your email"}, status= status.HTTP_201_CREATED)
-                    except Exception as e:
-                        return Response({"Message": str(e)})
+                    message = EmailVerification(request,user)
+                    return Response({"Message":message}, status=status.HTTP_200_OK)
 
             else:
                 return Response({"Message": "Error in validating data"}, status= status.HTTP_400_BAD_REQUEST)
@@ -93,11 +131,13 @@ def register(request):
             seri = SeekerSerializer(data=request.data)
         
             if seri.is_valid():
-                e=seri.save()
-                if 'Error Message'in e: 
-                    return Response({"Message":e }, status=status.HTTP_200_OK)
+                user=seri.save()
+                if 'Error Message'in user: 
+                    return Response({"Message":user }, status=status.HTTP_200_OK)
                 
-                return Response({"Message": "Seeker Created Successfully"}, status= status.HTTP_201_CREATED)
+                else:
+                    message = EmailVerification(request,user)
+                    return Response({"Message":message}, status=status.HTTP_200_OK)
             else:
                 return Response({"Message": "Error in validating data"}, status= status.HTTP_400_BAD_REQUEST)
         
@@ -201,7 +241,6 @@ def login_provider(request):
 @permission_classes([AllowAny])
 @csrf_exempt
 def login_seeker(request):
-    print(request.data)
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
         email = serializer.validated_data['email']
@@ -209,7 +248,7 @@ def login_seeker(request):
         
         user = authenticate(request, email=email, password=password)
         
-        if user is not None and user.is_seeker:
+        if user is not None and user.is_seeker and user.is_active:
             seeker = CustomUser.objects.get(email=email, is_seeker=True)
             seeker_id = seeker.id          
             try:
@@ -247,8 +286,6 @@ def view_provider(request):
     providers = CustomUser.objects.filter(is_provider = True)
     seri = UserSerializer(providers,many=True)
     return Response(seri.data)
-
-
 
 
 
