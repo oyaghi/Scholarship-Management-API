@@ -11,10 +11,9 @@ Project Description
 - [ ] You are not a robot  
 - [ ] Don't forget to update the login for both provider and seeker to include the is_active attribute  
 - [ ] Don't forget to update the the registration to include the seeker in the Email verification  
-- [ ] DRY for the Email verification thing  
 - [ ] Implements Throttle for Provider, Seeker, Anonomos Users (OPTIONAL)  
 - [ ] Implement Pagination on Functions the has the GET method (OPTIONAL)  
-- [ ] LOGOUT (Tell the Front-end to implement a button that clear the stored token, and then redirect the user to the login page)  
+- [ ] LOGOUT (Tell the Front-end to implement a button that clear the stored token, and then redirect the user to the login page) Delete the token from the local storage on client side  
 - [ ] New Function ( Give the token expiry a small duration and when the client makes a new api call then the expiry will be reset, if  he makes an api call when the token is expired he will be logged out and will be forced to login AGAIN )  
 - [ ] Modify the "Update"  API so that it can display the specific Error/Exception in the data validation.  
 
@@ -24,6 +23,7 @@ Project Description
 
 ### Done ✓
 
+- [x] DRY for the Email verification thing  
 - [x] Test all the function that uses the Email verification  
 - [x] Fix all the functions that uses the email verification  
 - [x] Find a way for re-send Email verification Email/ link  
