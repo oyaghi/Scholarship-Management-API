@@ -8,8 +8,6 @@ from .serializer import ProviderSerializer, UserSerializer, SeekerSerializer, Lo
 from rest_framework import status
 from django.contrib.auth import authenticate
 from rest_framework_simplejwt.tokens import RefreshToken
-from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
 
 # #Email
 from django.core.mail import send_mail

@@ -1,16 +1,12 @@
-from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.response import Response
-from rest_framework.decorators import api_view, permission_classes, authentication_classes
-from django.contrib.auth.models import Group
-from rest_framework.permissions import AllowAny, IsAdminUser, IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import  IsAuthenticated
 from rest_framework import status
 from .serializer import ScholarshipSerializer, ViewScholarshipSerializer, ViewScholarshipSeekerSerializer
 from .models import Scholarship
 from .permissions import isProvider, isSeeker
 from rest_framework_simplejwt.tokens import AccessToken
-from rest_framework_simplejwt.exceptions import TokenError, InvalidToken
-from datetime import datetime
 from rest_framework.exceptions import PermissionDenied
 from .models import Scholarship_Seeker
 
