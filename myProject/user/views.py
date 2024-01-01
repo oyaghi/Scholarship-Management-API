@@ -267,11 +267,11 @@ def Reset_Password(request, uidb64, token):
         if password != confirm_password:
             return Response({"Message": "The password and confirm password do not match"},status=status.HTTP_400_BAD_REQUEST)
         
-        user.password = password
+        user.set_password(password)
         user.save()  
         return Response({"Message": "your password has been changed"})  
     else:  
-        return HttpResponse('Activation link is invalid!') 
+        return Response('Activation link is invalid!') 
 
 
 
