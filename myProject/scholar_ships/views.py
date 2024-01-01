@@ -67,11 +67,11 @@ def add_view_scholarship(request):
     elif request.method == "GET":
         scholars = Scholarship.objects.all()
         
-        token = get_token(request)
-        access = AccessToken(token)
-        provider_id = access.payload['id']
-        request.data['provider'] = provider_id
-        
+        # token = get_token(request)
+        # access = AccessToken(token)
+        # provider_id = access.payload['id']
+        # request_data = request.query_params.copy()
+        # request_data['provider'] = provider_id
         
         if scholars.count() > 1:
             seri = ViewScholarshipSerializer(scholars,many=True,context={'request': request})

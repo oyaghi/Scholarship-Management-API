@@ -29,7 +29,7 @@ class ProviderSerializer(serializers.ModelSerializer):
         
     def create(self, validated_data):
         user_data = {
-            'email': validated_data['email'],
+            'email': validated_data['email'].lower(),
             'first_name': validated_data['first_name'],
             'last_name': validated_data['last_name'],
             'password': validated_data['password'],
@@ -43,7 +43,7 @@ class ProviderSerializer(serializers.ModelSerializer):
                 
                 provider = Provider.objects.create(
                     user=user,
-                    work_email=validated_data['work_email']
+                    work_email=validated_data['work_email'].lower()
                 )
                 serializer = ProviderSerializer(provider) # when you try to serialize the object for the response, it is still in an unsaved state and therefore cannot be converted to JSON correctly.
                 data = serializer.data
@@ -87,7 +87,7 @@ class SeekerSerializer(serializers.ModelSerializer):
     
     def create(self, validated_data):
         user_data = {
-            'email': validated_data['email'],
+            'email': validated_data['email'].lower(),
             'first_name': validated_data['first_name'],
             'last_name': validated_data['last_name'],
             'password': validated_data['password'],

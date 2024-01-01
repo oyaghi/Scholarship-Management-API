@@ -12,7 +12,7 @@ from rest_framework_simplejwt.tokens import RefreshToken
 # #Email
 from django.core.mail import send_mail
 from django.conf import settings
-from .tokens import EmailVerificationTokenGenerator
+from .tokens import EmailVerificationTokenGenerator, PasswordResetTokenGenerator
 from django.utils.http import urlsafe_base64_encode  # For encoding the user ID
 from django.utils.encoding import force_bytes  # For ensuring consistent byte representation
 from django.contrib.sites.shortcuts import get_current_site
@@ -33,7 +33,7 @@ def re_send_email_verification(request):
     user = request.data
     try:
         # Creating Verification Email
-        user             = CustomUser.objects.get(email=user['email'])
+        user             = CustomUser.objects.get(email=user['email'].lower())
         token_generator  = EmailVerificationTokenGenerator()
         token            = token_generator.make_token(user)
         uidb64           = urlsafe_base64_encode(force_bytes(user.pk))
@@ -44,7 +44,7 @@ def re_send_email_verification(request):
         subject         = 'Email verification'
         message         = f'Hi {user.first_name}\nPlease Verify Your Email\n{verification_url}'
         email_from      = settings.EMAIL_HOST_USER
-        recipient_list  = [user.email,]
+        recipient_list  = [user.email.lower(),]
         send_mail(subject, message,email_from,recipient_list)
         return Response({"Message": f"The Verification Email has been sent again Please check your email"}, status= status.HTTP_201_CREATED)
     except Exception as e:
@@ -55,7 +55,7 @@ def re_send_email_verification(request):
 def EmailVerification(request,user):
     try:
         # Creating Verification Email
-        user             = CustomUser.objects.get(email=user['email'])
+        user             = CustomUser.objects.get(email=user['email'].lower())
         token_generator  = EmailVerificationTokenGenerator()
         token            = token_generator.make_token(user)
         uidb64           = urlsafe_base64_encode(force_bytes(user.pk))
@@ -66,7 +66,7 @@ def EmailVerification(request,user):
         subject         = 'Email verification'
         message         = f'Hi {user.first_name}\nPlease Verify Your Email\n{verification_url}'
         email_from      = settings.EMAIL_HOST_USER
-        recipient_list  = [user.email,]
+        recipient_list  = [user.email.lower(),]
         send_mail(subject, message,email_from,recipient_list)
         return "Email has been sent successfully"
     except Exception as e:
@@ -77,7 +77,7 @@ def EmailVerification(request,user):
 
 
 
-def activate(request, uidb64, token):  
+def activate_Email(request, uidb64, token):  
     
     User = get_user_model()  
     try:  
@@ -150,19 +150,19 @@ def login_provider(request):
     
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
-        email = serializer.validated_data['email']
+        email = serializer.validated_data['email'].lower()
         password = serializer.validated_data['password']
         
-        user = authenticate(request, email=email, password=password)
+        user = authenticate(request, email=email.lower(), password=password)
         
         if user is not None and user.is_provider and user.is_active:
-            provider = CustomUser.objects.get(email=email, is_provider=True)
+            provider = CustomUser.objects.get(email=email.lower(), is_provider=True)
             provider_id = provider.id            
             try:
                 refresh = RefreshToken.for_user(user)
 
                 # Customize the payload with user information
-                refresh['email'] = email
+                refresh['email'] = email.lower()
                 refresh['role']  = "provider"       # Add other necessary user information to the payload
                 refresh['iss']   = 'BATATA-SUPER'
                 refresh['id']    = provider_id
@@ -193,19 +193,19 @@ def login_provider(request):
 def login_seeker(request):
     serializer = LoginSerializer(data=request.data)
     if serializer.is_valid():
-        email = serializer.validated_data['email']
+        email = serializer.validated_data['email'].lower()
         password = serializer.validated_data['password']
         
-        user = authenticate(request, email=email, password=password)
+        user = authenticate(request, email=email.lower(), password=password)
         
         if user is not None and user.is_seeker and user.is_active:
-            seeker = CustomUser.objects.get(email=email, is_seeker=True)
+            seeker = CustomUser.objects.get(email=email.lower(), is_seeker=True)
             seeker_id = seeker.id          
             try:
                 refresh = RefreshToken.for_user(user)
 
                 # Customize the payload with user information
-                refresh['email'] = email
+                refresh['email'] = email.lower()
                 refresh['role']  = "seeker"       # Add other necessary user information to the payload
                 refresh['iss']   = 'BATATA-SUPER'
                 refresh['id']    = seeker_id
@@ -228,14 +228,50 @@ def login_seeker(request):
 
 
 
-@api_view(['GET'])
+def Password_reset_Email(request,user):
+    try:
+        # Creating Verification Email
+        user             = CustomUser.objects.get(email=user.email.lower())
+        token_generator  = PasswordResetTokenGenerator()
+        token            = token_generator.make_token(user)
+        uidb64           = urlsafe_base64_encode(force_bytes(user.pk))
+        current_site     = get_current_site(request)
+        verification_url = f"https://{current_site.domain}/user/reset/{uidb64}/{token}/"
+        
+        # Sending the email 
+        subject         = 'Email verification'
+        message         = f'Hi {user.first_name}\nclick on this link to change your password\n{verification_url}'
+        email_from      = settings.EMAIL_HOST_USER
+        recipient_list  = [user.email.lower(),]
+        send_mail(subject, message,email_from,recipient_list)
+        return "Email has been sent successfully"
+    except Exception as e:
+        return str(e)
+
+
+
+@api_view(['POST'])
 @permission_classes([AllowAny])
 @csrf_exempt
-def view_provider(request):
+def Reset_Password(request, uidb64, token):  
+    password = request.data['password']
+    confirm_password = request.data['confirm_password']
     
-    providers = CustomUser.objects.filter(is_provider = True)
-    seri = UserSerializer(providers,many=True)
-    return Response(seri.data)
+    User = get_user_model()  
+    try:  
+        uid = force_str(urlsafe_base64_decode(uidb64))  
+        user = CustomUser.objects.get(pk=uid)  
+    except(TypeError, ValueError, OverflowError, User.DoesNotExist):  
+        user = None  
+    if user is not None and EmailVerificationTokenGenerator().check_token(user, token):  
+        if password != confirm_password:
+            return Response({"Message": "The password and confirm password do not match"},status=status.HTTP_400_BAD_REQUEST)
+        
+        user.password = password
+        user.save()  
+        return Response({"Message": "your password has been changed"})  
+    else:  
+        return HttpResponse('Activation link is invalid!') 
 
 
 
@@ -244,12 +280,16 @@ def view_provider(request):
 @permission_classes([AllowAny])
 @csrf_exempt
 def reset_password(request):
-    email = request.data.get('email')
+    email = request.data.get('email').lower()
     
     try:
-        user = CustomUser.objects.get(email=email)
-        
-        
+        user = CustomUser.objects.get(email=email.lower())
+        message=Password_reset_Email(request, user)
     except CustomUser.DoesNotExist:
         return Response({"Message": "User does not exist"})
+    
+    return Response({"Message": message})
+    
+    
+    
     
