@@ -22,9 +22,6 @@ class ScholarshipSerializer(serializers.ModelSerializer):
 
 
 class ViewCustomUserSerializer(serializers.ModelSerializer):
-    # email = serializers.EmailField(read_only=True)
-    # first_name = serializers.CharField(read_only=True)
-    # last_name = serializers.CharField(read_only=True)
     
     def to_representation(self, value):
         # Retrieve the provider object
