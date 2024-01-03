@@ -115,18 +115,6 @@ class SeekerSerializer(serializers.ModelSerializer):
         
         
         
-        
-class UserSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = CustomUser
-        fields = ["email", "first_name", "last_name"]
-        
-        
-class User2Serializer(serializers.ModelSerializer):
-    
-    class Meta:
-        fields = ['email', 'first_name', 'last_name', 'work_email']
-        
 class LoginSerializer(serializers.ModelSerializer):
     email = serializers.EmailField()
     password = serializers.CharField()
