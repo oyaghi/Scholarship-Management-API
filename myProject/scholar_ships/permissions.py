@@ -67,7 +67,7 @@ class isProvider(BasePermission):
 
 class isSeeker(BasePermission):
     
-    def has_permission(self, request, view):
+    def has_permission(self, request, view):  # This method is responsible for checking permissions at the view level.
         # Authenticate the request using JWTAuthentication
         token = get_token(request)
         if token:
@@ -82,3 +82,9 @@ class isSeeker(BasePermission):
                 return True 
             else:
                 raise PermissionDenied("This token don't belong to seeker ")
+            
+            
+class isOwner(BasePermission):
+    message= "You are not the owner of this Scholarship"
+    def has_object_permission (self, request, view, obj):  # This method is used for object-level permissions.
+        return obj.provider.user == request.user

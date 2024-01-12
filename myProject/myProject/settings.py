@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     'rest_framework_simplejwt',
     'scholar_ships',
     'corsheaders',
+    'drf_spectacular',
     
 ]
 
@@ -155,7 +156,14 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ],
+    'DEFAULT_SCHEMA_CLASS': [
+        'drf_spectacular.openapi.AutoSchema'
+    ]
 }
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "Django DRF Scholar Project",
+    }
 
 SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),  # Set the token expiration (example: 1 hour)
